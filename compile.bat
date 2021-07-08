@@ -1,0 +1,1 @@
+tsc && browserify scripts/popup.js -o bundle.js

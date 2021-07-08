@@ -1,0 +1,10 @@
+{
+    "name": "KeyChain",
+    "description": "A Bitcoin wallet in your browser!",
+    "version": "1.0",
+    "manifest_version": 3,
+    "permissions": ["storage"],
+    "action":{
+        "default_popup": "popup.html"
+    }
+}
