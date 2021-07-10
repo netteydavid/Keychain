@@ -3,6 +3,13 @@
         "lib": [ "es2015", "dom" ]
     },
     "files": [
+        "./scripts/create_wallet.ts",
+        "./scripts/create_pwd.ts",
+        "./scripts/home.ts",
+        "./scripts/login.ts",
+        "./scripts/manage_keys.ts",
+        "./scripts/navigation.ts",
+        "./scripts/recover_wallet.ts",
         "./scripts/popup.ts"
     ]
 }

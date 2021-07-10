@@ -1,10 +1,9 @@
 "use strict";
+import * as $ from 'jquery';
 import * as bip39 from 'bip39';
 
-let words = ""; //TODO: Store in background script?
-
-  function create_mnemonic(){
-    words = bip39.generateMnemonic(256);
+  export function create_mnemonic(){
+    const words = bip39.generateMnemonic(256);
     let wordTable = document.getElementById("words") as HTMLTableElement;
     
     const wordArr = words.split(" ");
@@ -15,6 +14,8 @@ let words = ""; //TODO: Store in background script?
       let cell2 = row.insertCell();
       cell2.innerHTML = `${i + 13}. ${wordArr[i + 12]}`;
     }
+
+    chrome.storage.local.set({words});
 
     $("#create_pwd").show();
 }
