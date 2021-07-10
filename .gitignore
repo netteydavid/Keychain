@@ -1,1 +1,4 @@
 /node_modules
+# ignore javascript files
+*.js
+scripts/*.js
