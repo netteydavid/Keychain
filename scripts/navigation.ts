@@ -4,6 +4,7 @@ import { create_mnemonic } from "./create_wallet";
 import { compile_mnemonic } from './recover_wallet';
 import { set_password } from './create_pwd';
 import { login } from './login';
+import { list_addresses } from './home';
 
 //Goes to the initialization page
 export function goto_init(){
@@ -46,6 +47,7 @@ export function goto_login(){
 export function goto_home(){
     $("#content").load("../content/home.html", () => {
         $("#home_script").load("home.js");
+        list_addresses();
     });
     //TODO: Display all generated addresses
 }

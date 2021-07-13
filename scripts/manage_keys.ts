@@ -58,3 +58,14 @@ export function decryptXpriv(password, callback){
   
     return Buffer.from(typedArray);
   }
+
+export function gen_child(xkey, testnet, account, change, index){
+  // return (xkey as bip32.BIP32Interface)
+  // .deriveHardened(84)
+  // .deriveHardened(testnet ? 1 : 0)
+  // .deriveHardened(account)
+  // .derive(change ? 1 : 0)
+  // .derive(index);
+  return (xkey as bip32.BIP32Interface)
+  .derivePath(`m/84'/${testnet ? 1 : 0}'/${account}'/${change ? 1 : 0}/${index}`);
+}
