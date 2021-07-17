@@ -3,6 +3,7 @@ import * as $ from 'jquery';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as bip32 from "bip32";
 import { gen_child } from './manage_keys';
+import { goto_account } from './navigation';
 
 export function list_addresses(){
     chrome.storage.local.get(["xpriv_temp", "accounts"], (results) => {
@@ -35,5 +36,25 @@ export function list_addresses(){
             addressList += "<br />";
         }
         $("#addresses").html(addressList);
+    });
+}
+
+export function list_accounts(){
+    chrome.storage.local.get(["xpriv_temp", "accounts"], (results) => {
+        let accounts = [];
+        if (results.accounts == null){
+            accounts.push({name: "Main Account", rec: 0, change: 0});
+            chrome.storage.local.set({accounts});
+        }
+        else {
+            accounts = results.accounts;
+        }
+        let table = $("#accounts").get(0) as HTMLTableElement;
+        for(let i = 0; i < accounts.length; ++i){
+            let row = table.insertRow();
+            let cell = row.insertCell();
+            cell.innerHTML = `<button class="acct" id="acct${i}">${accounts[i].name}</button>`;
+            $(`#acct${i}`).on("click", {i}, goto_account);
+        }
     });
 }

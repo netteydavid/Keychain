@@ -4,7 +4,7 @@ import * as bip39 from 'bip39';
 
   export function create_mnemonic(){
     const words = bip39.generateMnemonic(256);
-    let wordTable = document.getElementById("words") as HTMLTableElement;
+    let wordTable = $("words").get(0) as HTMLTableElement;
     
     const wordArr = words.split(" ");
     for (let i = 0; i < wordArr.length/2; ++i){
