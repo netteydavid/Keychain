@@ -58,6 +58,7 @@ export function goto_home(){
 
 export function goto_account(eventObject){
     $("#content").load("../content/account.html", () => {
+        $("#account_script").load("account.js");
         load_account(eventObject.data.i);
     });
 }
