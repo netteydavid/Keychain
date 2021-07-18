@@ -5,7 +5,7 @@ import { compile_mnemonic } from './recover_wallet';
 import { set_password } from './create_pwd';
 import { login } from './login';
 import {load_account} from './account';
-import { list_accounts, list_addresses } from './home';
+import { add_account, close_account_creation, create_account, list_accounts, list_addresses } from './home';
 
 //Goes to the initialization page
 export function goto_init(){
@@ -47,6 +47,9 @@ export function goto_login(){
 
 export function goto_home(){
     $("#content").load("../content/home.html", () => {
+        $("#add_account_btn").on("click", create_account);
+        $("#new_account_btn").on("click", add_account);
+        $("#cancel_account_btn").on("click", close_account_creation);
         $("#home_script").load("home.js");
         // list_addresses();
         list_accounts();

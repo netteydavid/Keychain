@@ -40,13 +40,10 @@ export function list_addresses(){
 }
 
 export function list_accounts(){
+    $("#accounts").html("");
     chrome.storage.local.get(["xpriv_temp", "accounts"], (results) => {
         let accounts = [];
-        if (results.accounts == null){
-            accounts.push({name: "Main Account", rec: 0, change: 0});
-            chrome.storage.local.set({accounts});
-        }
-        else {
+        if (results.accounts != null){
             accounts = results.accounts;
         }
         let table = $("#accounts").get(0) as HTMLTableElement;
@@ -57,4 +54,36 @@ export function list_accounts(){
             $(`#acct${i}`).on("click", {i}, goto_account);
         }
     });
+}
+
+export function add_account(){
+    let name = $("#new_account_name").val();
+    if (name == "" || name == null){
+        $("#no_name_err").show();
+    }
+    else{
+        chrome.storage.local.get(["accounts"], (results) => {
+            let accounts = [];
+            if (results.accounts != null){
+                accounts = results.accounts;
+            }
+            accounts.push({name: name, rec: 0, change: 0});
+            chrome.storage.local.set({accounts}, () => {
+                close_account_creation();
+                list_accounts();
+            })
+        });
+    }
+}
+
+export function create_account(){
+    $("#new_account").show();
+    $("#add_account_btn").hide();
+}
+
+export function close_account_creation(){
+    $("#no_name_err").hide();
+    $("#new_account_name").val("");
+    $("#new_account").hide();
+    $("#add_account_btn").show();
 }
