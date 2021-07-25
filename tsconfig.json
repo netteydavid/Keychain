@@ -11,6 +11,8 @@
         "./scripts/manage_keys.ts",
         "./scripts/navigation.ts",
         "./scripts/recover_wallet.ts",
-        "./scripts/popup.ts"
+        "./scripts/popup.ts",
+        "./scripts/models/Page.ts",
+        "./scripts/models/Account.ts"
     ]
 }
