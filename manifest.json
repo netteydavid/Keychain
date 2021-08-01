@@ -3,7 +3,8 @@
     "description": "A Bitcoin wallet in your browser!",
     "version": "1.0",
     "manifest_version": 3,
-    "permissions": ["storage"],
+    "options_page": "options.html",
+    "permissions": ["storage", "alarms"],
     "action":{
         "default_popup": "popup.html"
     }

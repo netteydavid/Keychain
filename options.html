@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<meta http-equiv="Content-Security-Policy" content=""
+<html>
+    <head>
+        <title>Keychain Options</title>
+        <script>
+            //TODO: FIGURE OUT HOW TO GET JS IN OPTIONS
+            //https://content-security-policy.com/examples/meta/
+            
+            window.onload = () => {
+                $("#save_btn").on("click", () => {
+                    let timeout = $("#timeout").val();
+                    let logout_on_exit = $("#logout_on_exit").get(0);
+
+                    let settings = {
+                        login_timeout: timeout,
+                        logout_on_exit: logout_on_exit
+                    };
+                    
+                    chrome.storage.local.set({ settings }, () => {
+                        console.log("Saved!");
+                    });
+                });
+            };
+        </script>
+    </head>
+    <body>
+        <h2>Keychain Wallet Options</h2>
+        <br />
+        Login Timeout: <input id="timeout" type="number" min="1" max="5"> minutes
+        <br />
+        <br />
+        <input type="checkbox" id="logout_on_exit"> Log Out on Exit
+        <br />
+        <br />
+        <button type="button" id="save_btn">Save</button>
+    </body>
+</html>
