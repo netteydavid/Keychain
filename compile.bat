@@ -1,1 +1,1 @@
-tsc && browserify scripts/popup.js -o bundle.js
+tsc && browserify scripts/popup.js -o bundle.js & browserify scripts/options.js -o optionbundle.js
