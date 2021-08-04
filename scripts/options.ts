@@ -8,7 +8,7 @@ window.onload = () => {
     //Get the settings
     const settings: Settings = get_settings();
     $("#timeout").val(settings.login_timeout);
-    ($("#logout_on_exit").get(0) as HTMLInputElement).checked = settings.testnet;
+    ($("#use_testnet").get(0) as HTMLInputElement).checked = settings.testnet;
 
     //Save button
     $("#save_btn").on("click", () => {
