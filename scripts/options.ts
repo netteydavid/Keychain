@@ -2,15 +2,22 @@
 
 import * as $ from 'jquery';
 import { Settings } from './models/Settings';
+import { get_settings } from './popup';
 
 window.onload = () => {
+    //Get the settings
+    const settings: Settings = get_settings();
+    $("#timeout").val(settings.login_timeout);
+    ($("#logout_on_exit").get(0) as HTMLInputElement).checked = settings.testnet;
+
+    //Save button
     $("#save_btn").on("click", () => {
         let timeout: number = $("#timeout").val() as number;
-        let logout_on_exit: boolean = ($("#logout_on_exit").get(0) as HTMLInputElement).checked;
+        let use_testnet: boolean = ($("#use_testnet").get(0) as HTMLInputElement).checked;
     
         let settings: Settings = new Settings();
         settings.login_timeout = timeout;
-        settings.logout_on_exit = logout_on_exit;
+        settings.testnet = use_testnet;
         
         chrome.storage.local.set({ settings }, () => {
             console.log("Saved!");

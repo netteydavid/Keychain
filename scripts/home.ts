@@ -4,6 +4,8 @@ import * as bitcoin from 'bitcoinjs-lib';
 import * as bip32 from "bip32";
 import { gen_child } from './manage_keys';
 import { goto_account } from './navigation';
+import { Settings } from './models/Settings';
+import { get_settings } from './popup';
 
 export function list_addresses(){
     chrome.storage.local.get(["xpriv_temp", "accounts"], (results) => {
@@ -17,18 +19,21 @@ export function list_addresses(){
         }
         const xpriv_temp = bip32.fromBase58(results.xpriv_temp);
         let addressList = "";
+        
+        const settings: Settings = get_settings();
+        
         for(let i = 0; i < accounts.length; ++i){
             addressList += `${accounts[i].name}<br />`;
             //Recieve addresses
             for (let j = 0; j < accounts[i].rec + 1; ++j){
-                let child = gen_child(xpriv_temp, false, i, false, j);
+                let child = gen_child(xpriv_temp, settings.testnet, i, false, j);
                 let keypair = bitcoin.ECPair.fromPrivateKey(child.privateKey);
                 let address = bitcoin.payments.p2wpkh({pubkey: keypair.publicKey});
                 addressList += `${address.address}<br />`;
             }
             //Change addresses
             for (let j = 0; j < accounts[i].change + 1; ++j){
-                let child = gen_child(xpriv_temp, true, i, true, j);
+                let child = gen_child(xpriv_temp, settings.testnet, i, true, j);
                 let keypair = bitcoin.ECPair.fromPrivateKey(child.privateKey);
                 let address = bitcoin.payments.p2wpkh({pubkey: keypair.publicKey});
                 addressList += `${address.address}<br />`;

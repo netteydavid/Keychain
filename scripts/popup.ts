@@ -8,10 +8,16 @@ let timeout = null;
 
 const default_settings: Settings = new Settings();
 
+let current_settings: Settings = null;
+
+export function get_settings(){
+    return (current_settings != null) ? current_settings : default_settings;
+}
+
 window.onload = () => {
     $("#clear_btn").on("click", clear_memory);
     window.onclick = () => stay_alive();
-    chrome.storage.local.get(["xpriv", "xpriv_temp"], (result) => {
+    chrome.storage.local.get(["settings", "xpriv", "xpriv_temp"], (result) => {
         if (result.xpriv_temp != null){
             goto_home();
             stay_alive();
@@ -22,16 +28,17 @@ window.onload = () => {
         else{
             goto_init();
         }
+        if (result.settings != null){
+            current_settings = result.settings;
+        }
     });
 };
 
 function stay_alive(){
-    chrome.storage.local.get(["settings", "xpriv_temp"], (results) => {
+    const settings: Settings = get_settings();
+    chrome.storage.local.get(["xpriv_temp"], (results) => {
         if (results.xpriv_temp != null){
-            let min: number = default_settings.login_timeout;
-            if (results.settings != null){
-                min = (results.settings as Settings).login_timeout;
-            }
+            let min: number = settings.login_timeout;
             
             if (timeout == null){
                 timeout = window.setTimeout(logout, min * 60000);
