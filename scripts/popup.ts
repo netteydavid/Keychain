@@ -17,9 +17,17 @@ export function get_settings(){
 window.onload = () => {
     $("#clear_btn").on("click", clear_memory);
     window.onclick = () => stay_alive();
-    chrome.storage.local.get(["settings", "xpriv", "xpriv_temp"], (result) => {
-        if (result.xpriv_temp != null){
-            goto_home();
+    chrome.storage.local.get(["settings", "xpriv", "last_login"], (result) => {
+        
+        if (result.settings != null){
+            current_settings = result.settings;
+        }
+
+        const settings = get_settings();
+        
+        if (result.last_login != null 
+            && Date.now() - result.last_login < settings.login_timeout * 60000){
+            goto_home(settings.advanced);
             stay_alive();
         }
         else if (result.xpriv != null){
@@ -28,16 +36,13 @@ window.onload = () => {
         else{
             goto_init();
         }
-        if (result.settings != null){
-            current_settings = result.settings;
-        }
     });
 };
 
 function stay_alive(){
     const settings: Settings = get_settings();
-    chrome.storage.local.get(["xpriv_temp"], (results) => {
-        if (results.xpriv_temp != null){
+    chrome.storage.local.get(["last_login"], (results) => {
+        if (results.last_login != null){
             let min: number = settings.login_timeout;
             
             if (timeout == null){

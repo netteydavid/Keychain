@@ -2,12 +2,12 @@
 
 export class Account {
     name: string;
-    rec: number;
-    change: number;
+    recieve_ind: number;
+    change_ind: number;
 
-    constructor(name: string, rec: number = 0, change: number = 0) {
+    constructor(name: string, recieve_ind: number = 0, change_ind: number = 0) {
         this.name = name;
-        this.rec = rec;
-        this.change = change;
+        this.recieve_ind = recieve_ind;
+        this.change_ind = change_ind;
     }
 }

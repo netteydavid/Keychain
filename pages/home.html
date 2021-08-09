@@ -1,17 +1,14 @@
 <h2>Welcome!</h2>
 <br />
 <br />
-<div id="sat_total"></div>
+<h2 id="balance"><span id="num"></span> <span id="unit"></span></h2>
 <br />
-<button id="add_account_btn">Create an Account</button>
+<span>
+    <button>Send</button>
+    <button style="position: absolute; right: 20px;">Recieve</button>
+</span>
 <br />
-<div id="new_account" hidden>
-    <label>Account Name </label>
-    <input id="new_account_name" type="text"><br />
-    <div id="no_name_err" hidden>Please enter a valid account name</div>
-    <button id="new_account_btn">Add Account</button>
-    <button id="cancel_account_btn">Cancel</button>
-</div>
+<br />
 <hr>
-<table id="accounts"></table>
+<div id="tx_history"></div>
 <script id="home_script"></script>

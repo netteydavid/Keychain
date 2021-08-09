@@ -6,59 +6,17 @@ import { gen_child } from './manage_keys';
 import { goto_account } from './navigation';
 import { Settings } from './models/Settings';
 import { get_settings } from './popup';
+import { Account } from './models/Account';
 
-export function list_addresses(){
-    chrome.storage.local.get(["xpriv_temp", "accounts"], (results) => {
-        let accounts = [];
-        if (results.accounts == null){
-            accounts.push({name: "Main Account", rec: 0, change: 0});
-            chrome.storage.local.set({accounts});
-        }
-        else {
-            accounts = results.accounts;
-        }
-        const xpriv_temp = bip32.fromBase58(results.xpriv_temp);
-        let addressList = "";
-        
-        const settings: Settings = get_settings();
-        
-        for(let i = 0; i < accounts.length; ++i){
-            addressList += `${accounts[i].name}<br />`;
-            //Recieve addresses
-            for (let j = 0; j < accounts[i].rec + 1; ++j){
-                let child = gen_child(xpriv_temp, settings.testnet, i, false, j);
-                let keypair = bitcoin.ECPair.fromPrivateKey(child.privateKey);
-                let address = bitcoin.payments.p2wpkh({pubkey: keypair.publicKey});
-                addressList += `${address.address}<br />`;
-            }
-            //Change addresses
-            for (let j = 0; j < accounts[i].change + 1; ++j){
-                let child = gen_child(xpriv_temp, settings.testnet, i, true, j);
-                let keypair = bitcoin.ECPair.fromPrivateKey(child.privateKey);
-                let address = bitcoin.payments.p2wpkh({pubkey: keypair.publicKey});
-                addressList += `${address.address}<br />`;
-            }
-            addressList += "<br />";
-        }
-        $("#addresses").html(addressList);
-    });
-}
-
-export function list_accounts(){
+function list_accounts(accounts: Account[] = []){
     $("#accounts").html("");
-    chrome.storage.local.get(["xpriv_temp", "accounts"], (results) => {
-        let accounts = [];
-        if (results.accounts != null){
-            accounts = results.accounts;
-        }
-        let table = $("#accounts").get(0) as HTMLTableElement;
-        for(let i = 0; i < accounts.length; ++i){
-            let row = table.insertRow();
-            let cell = row.insertCell();
-            cell.innerHTML = `<button class="acct" id="acct${i}">${accounts[i].name}</button>`;
-            $(`#acct${i}`).on("click", {i}, goto_account);
-        }
-    });
+    let table = $("#accounts").get(0) as HTMLTableElement;
+    for(let i = 0; i < accounts.length; ++i){
+        let row = table.insertRow();
+        let cell = row.insertCell();
+        cell.innerHTML = `<button class="acct" id="acct${i}">${accounts[i].name}</button>`;
+        $(`#acct${i}`).on("click", {i}, goto_account);
+    }
 }
 
 export function add_account(){
@@ -79,6 +37,24 @@ export function add_account(){
             })
         });
     }
+}
+
+export function accounts_check(advanced: boolean){
+    chrome.storage.local.get(["accounts"], (results) => {
+        let accounts: Account[] = [];
+        if (results.accounts != null){
+            accounts = results.accounts;
+        }
+        if (accounts.length = 0){
+            accounts.push(new Account("Main"));
+            chrome.storage.local.set({accounts}, () => {
+                if (advanced) list_accounts(accounts);
+            })
+        }
+        else if (advanced){
+            list_accounts(accounts);
+        }
+    });
 }
 
 export function create_account(){

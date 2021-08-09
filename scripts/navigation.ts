@@ -5,9 +5,10 @@ import { compile_mnemonic } from './recover_wallet';
 import { set_password } from './create_pwd';
 import { login } from './login';
 import {load_account} from './account';
-import { add_account, close_account_creation, create_account, list_accounts } from './home';
+import { add_account, close_account_creation, create_account, accounts_check } from './home';
 import { Page } from './models/Page';
 import exp = require('constants');
+import { get_settings } from './popup';
 
 let breadcrumbs: Page[] = [];
 
@@ -56,14 +57,22 @@ export function goto_login(){
     });
 }
 
-export function goto_home(){
-    $("#content").load("../pages/home.html", () => {
-        $("#add_account_btn").on("click", create_account);
-        $("#new_account_btn").on("click", add_account);
-        $("#cancel_account_btn").on("click", close_account_creation);
-        // $("#home_script").load("./home.js");
-        list_accounts();
-    });
+export function goto_home(advanced: boolean){
+    if (advanced){
+        $("#content").load("../pages/adv_home.html", () => {
+            $("#add_account_btn").on("click", create_account);
+            $("#new_account_btn").on("click", add_account);
+            $("#cancel_account_btn").on("click", close_account_creation);
+            accounts_check(advanced);
+        });
+    }
+    else{
+        $("#content").load("../pages/home.html", () => {
+            //TODO: Send button
+            //TODO: Recieve button
+            accounts_check(advanced);
+        });
+    }
 }
 
 export function goto_account(eventObject){
@@ -83,12 +92,12 @@ export function back(){
     else{
         breadcrumbs.pop();
         if (breadcrumbs.length < 1){
-            chrome.storage.local.get(["xpriv", "xpriv_temp"], (results) =>
+            chrome.storage.local.get(["xpriv", "accounts"], (results) =>
             {
-                if (results.xpriv_temp != null && results.xpriv != null){
-                    goto_home();
+                if (results.accounts != null && results.xpriv != null){
+                    goto_home(get_settings().advanced);
                 }
-                else if (results.xpriv_temp != null){
+                else if (results.accounts != null){
                     goto_login();
                 }
                 else{
@@ -111,6 +120,6 @@ export function back(){
 
 export function logout(){
     breadcrumbs = [];
-    chrome.storage.local.remove("xpriv_temp");
+    chrome.storage.local.remove("last_login");
     goto_login();
 }
