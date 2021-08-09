@@ -6,7 +6,6 @@
     </head>
     <body>
         <h2>Keychain Wallet Options</h2>
-        <br />
         Login Timeout: <input id="timeout" type="number" min="1" max="5" value="1"> minutes
         <br />
         <br />
@@ -16,6 +15,14 @@
         <input type="checkbox" id="advanced"> Enable Advanced Features
         <br />
         <br />
+        <div id="advanced_features">
+            <label class="testnet">Testnet Node URL</label> <input type="text" id="testnet_node" class="testnet">
+            <br class="testnet" />
+            <br class="testnet" />
+            <label class="mainnet">Mainnet Node URL</label> <input type="text" id="mainnet_node" class="mainnet">
+            <br class="mainnet" />
+            <br class="mainnet" />
+        </div>
         <button type="button" id="save_btn">Save</button>
     </body>
 </html>
