@@ -17,6 +17,8 @@ window.onload = () => {
     ($("#advanced").get(0) as HTMLInputElement).checked = settings.advanced;
     $("#testnet_node").val(settings.testnet_node);
     $("#mainnet_node").val(settings.mainnet_node);
+    $("#unit").val(settings.unit);
+    $("#fiat").val(settings.fiat);
     adv_toggle();
 
     //Save button
@@ -26,6 +28,9 @@ window.onload = () => {
         let advanced: boolean = ($("#advanced").get(0) as HTMLInputElement).checked;
         let mainnet_node: string = $("#mainnet_node").val() as string;
         let testnet_node: string = $("#testnet_node").val() as string;
+        let unit: number = $("#unit").val() as number;
+        let fiat: number = $("#fiat").val() as number;
+
     
         let settings: Settings = new Settings();
         settings.login_timeout = timeout;
@@ -33,6 +38,8 @@ window.onload = () => {
         settings.advanced = advanced;
         settings.testnet_node = testnet_node;
         settings.mainnet_node = mainnet_node;
+        settings.unit = unit;
+        settings.fiat = fiat;
         
         chrome.storage.local.set({ settings }, () => {
             console.log("Saved!");

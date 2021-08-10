@@ -3,6 +3,7 @@
         "lib": [ "es2015", "dom" ]
     },
     "files": [
+        "./scripts/api_calls.ts",
         "./scripts/options.ts",
         "./scripts/account.ts",
         "./scripts/create_wallet.ts",

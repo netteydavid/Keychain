@@ -1,12 +1,11 @@
 "use strict";
 import * as $ from 'jquery';
-import * as bitcoin from 'bitcoinjs-lib';
-import * as bip32 from "bip32";
-import { gen_child } from './manage_keys';
 import { goto_account } from './navigation';
-import { Settings } from './models/Settings';
 import { get_settings } from './popup';
 import { Account } from './models/Account';
+import { get_balance, update_price } from './api_calls';
+
+let update_timer = null;
 
 function list_accounts(accounts: Account[] = []){
     $("#accounts").html("");
@@ -42,18 +41,18 @@ export function add_account(){
 export function accounts_check(advanced: boolean){
     chrome.storage.local.get(["accounts"], (results) => {
         let accounts: Account[] = [];
-        if (results.accounts != null){
+        if (results.accounts != null && advanced){
             accounts = results.accounts;
+            list_accounts(accounts);
         }
-        if (accounts.length = 0){
+        else {
             accounts.push(new Account("Main"));
             chrome.storage.local.set({accounts}, () => {
                 if (advanced) list_accounts(accounts);
-            })
+            });
         }
-        else if (advanced){
-            list_accounts(accounts);
-        }
+    
+        call_update();
     });
 }
 
@@ -67,4 +66,34 @@ export function close_account_creation(){
     $("#new_account_name").val("");
     $("#new_account").hide();
     $("#add_account_btn").show();
+}
+
+function update(balance: number = 0, price: number = 0, symbol: string = "USD"){
+    const settings = get_settings();
+    
+    if (settings.unit == 2){
+        $("#balance #num").text(`${balance/100000000}`);
+        $("#balance #unit").text("BTC");
+    }
+    else{
+        $("#balance #num").text(`${balance}`);
+        $("#balance #unit").text("sats");
+    }
+
+    $("#price #num").text(`${price*balance/100000000}`);
+    $("#price #unit").text(symbol);
+    
+    update_timer = window.setTimeout(call_update, 2 * 60000);
+}
+
+function call_update(){
+    //Get price
+    update_price((price, symbol) => {
+        //Update balance
+        get_balance(balance => {
+            console.log(`Balance: ${balance} sats`);
+            update(balance, price, symbol);
+        });
+    });
+    
 }

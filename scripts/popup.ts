@@ -22,6 +22,10 @@ window.onload = () => {
         if (result.settings != null){
             current_settings = result.settings;
         }
+        else{
+            current_settings = default_settings;
+            chrome.storage.local.set({ settings: current_settings });
+        }
 
         const settings = get_settings();
         

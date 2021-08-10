@@ -63,6 +63,7 @@ export function goto_home(advanced: boolean){
             $("#add_account_btn").on("click", create_account);
             $("#new_account_btn").on("click", add_account);
             $("#cancel_account_btn").on("click", close_account_creation);
+            $("#logout").on("click", logout);
             accounts_check(advanced);
         });
     }
@@ -70,6 +71,7 @@ export function goto_home(advanced: boolean){
         $("#content").load("../pages/home.html", () => {
             //TODO: Send button
             //TODO: Recieve button
+            $("#logout").on("click", logout);
             accounts_check(advanced);
         });
     }
