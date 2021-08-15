@@ -7,7 +7,7 @@ import { get_balance, update_price } from './api_calls';
 
 let update_timer = null;
 
-function list_accounts(accounts: Account[] = []){
+export function list_accounts(accounts: Account[] = []){
     $("#accounts").html("");
     let table = $("#accounts").get(0) as HTMLTableElement;
     for(let i = 0; i < accounts.length; ++i){
@@ -38,21 +38,20 @@ export function add_account(){
     }
 }
 
-export function accounts_check(advanced: boolean){
+export function accounts_check(advanced: boolean, callback: Function){
     chrome.storage.local.get(["accounts"], (results) => {
         let accounts: Account[] = [];
         if (results.accounts != null && advanced){
             accounts = results.accounts;
-            list_accounts(accounts);
+            callback(accounts)
         }
         else {
             accounts.push(new Account("Main"));
             chrome.storage.local.set({accounts}, () => {
-                if (advanced) list_accounts(accounts);
+                console.log("Added main account");
+                callback(accounts)
             });
         }
-    
-        call_update();
     });
 }
 
@@ -86,7 +85,7 @@ function update(balance: number = 0, price: number = 0, symbol: string = "USD"){
     update_timer = window.setTimeout(call_update, 2 * 60000);
 }
 
-function call_update(){
+export function call_update(){
     //Get price
     update_price((price, symbol) => {
         //Update balance

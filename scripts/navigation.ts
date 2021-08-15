@@ -5,7 +5,7 @@ import { compile_mnemonic } from './recover_wallet';
 import { set_password } from './create_pwd';
 import { login } from './login';
 import {load_account} from './account';
-import { add_account, close_account_creation, create_account, accounts_check } from './home';
+import { add_account, close_account_creation, create_account, accounts_check, list_accounts, call_update } from './home';
 import { Page } from './models/Page';
 import exp = require('constants');
 import { get_settings } from './popup';
@@ -64,7 +64,10 @@ export function goto_home(advanced: boolean){
             $("#new_account_btn").on("click", add_account);
             $("#cancel_account_btn").on("click", close_account_creation);
             $("#logout").on("click", logout);
-            accounts_check(advanced);
+            accounts_check(advanced, (accounts) => {
+                list_accounts(accounts);
+                call_update();
+            });
         });
     }
     else{
@@ -72,7 +75,9 @@ export function goto_home(advanced: boolean){
             //TODO: Send button
             //TODO: Recieve button
             $("#logout").on("click", logout);
-            accounts_check(advanced);
+            accounts_check(advanced, (accounts) => {
+                call_update();
+            });
         });
     }
 }

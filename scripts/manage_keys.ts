@@ -5,8 +5,10 @@ import * as bip39 from 'bip39';
 import * as crypto from 'crypto';
 import * as $ from 'jquery';
 import { Account } from './models/Account';
+import { Xpub } from './models/Xpub';
 import { get_settings } from './popup';
 import * as bitcoin from 'bitcoinjs-lib';
+import { accounts_check } from './home';
 
 export function encryptXpriv(password, mnemonic){
     //Get seed
@@ -63,30 +65,40 @@ export function decryptXpriv(password, callback){
     return Buffer.from(typedArray);
   }
 
-export function check_accounts(xpriv: bip32.BIP32Interface, callback: Function){
-  chrome.storage.local.get("accounts", (results) => {
-    let accounts: Account[] = results.accounts;
+export function check_xpubs(xpriv: bip32.BIP32Interface, callback: Function){
+  chrome.storage.local.get(["accounts", "xpubs"], (results) => {
+    const accounts: Account[] = results.accounts;
+    const xpubs: Xpub[] = results.xpubs;
+    let new_xpubs: Xpub[] = [];
     if (accounts != null){
       for (let i = 0; i < accounts.length; ++i){
-        if (accounts[i].xpub_testnet == "") {
-          let key = xpriv.deriveHardened(84)
+        if (xpubs == null || i >= xpubs.length){
+          let xpub = new Xpub();
+          xpub.account = i;
+          const testkey = xpriv.deriveHardened(84)
             .deriveHardened(1)
             .deriveHardened(i);
-          accounts[i].xpub_testnet = key.neutered().toBase58();
-        }
-        if (accounts[i].xpub == "") {
-          let key = xpriv.deriveHardened(84)
+          const mainkey = xpriv.deriveHardened(84)
             .deriveHardened(0)
             .deriveHardened(i);
-          accounts[i].xpub = key.neutered().toBase58();
+          xpub.mainnet = mainkey.neutered().toBase58();
+          xpub.testnet = testkey.neutered().toBase58();
+
+          new_xpubs.push(xpub);
+        }
+        else{
+          new_xpubs.push(xpubs[i]);
         }
       }
       
-      //TODO: Figure out why this isn't saving
-      chrome.storage.local.set({ accounts: accounts }, callback());
+      if (xpubs == null || xpubs.length != new_xpubs.length){
+        chrome.storage.local.set({ xpubs: new_xpubs }, callback());
+      }
     }
     else{
-      callback();
+      accounts_check(false, (accounts) => {
+        check_xpubs(xpriv, callback);
+      });
     }
   });
 }
@@ -125,37 +137,37 @@ export function list_addresses(xpriv: bip32.BIP32Interface, account_ind: number,
   return results;
 }
 
-export function get_account_addresses(account: Account){
+export function get_account_addresses(account: Account, xpub: Xpub){
   let testnets: string[] = [];
   let mainnets: string[] = [];
 
-  console.log(`Testnet: ${account.xpub_testnet}`);
-  console.log(`Mainnet: ${account.xpub}`);
+  console.log(`Testnet: ${xpub.testnet}`);
+  console.log(`Mainnet: ${xpub.mainnet}`);
 
   //Testnet
   for (let i = 0; i < account.recieve_ind + 1; ++i){
-    let xpub = bip32.fromBase58(account.xpub_testnet);
-    let key = gen_child_pub(xpub, false, i);
+    const bipXpub = bip32.fromBase58(xpub.testnet);
+    const key = gen_child_pub(bipXpub, false, i);
     const address = bitcoin.payments.p2wpkh({ pubkey: key.publicKey });
     testnets.push(address.address);
   }
   for (let i = 0; i < account.change_ind + 1; ++i){
-    let xpub = bip32.fromBase58(account.xpub_testnet);
-    let key = gen_child_pub(xpub, true, i);
+    const bipXpub = bip32.fromBase58(xpub.testnet);
+    const key = gen_child_pub(bipXpub, true, i);
     const address = bitcoin.payments.p2wpkh({ pubkey: key.publicKey });
     testnets.push(address.address);
   }
 
   //Mainnet
   for (let i = 0; i < account.recieve_ind + 1; ++i){
-    let xpub = bip32.fromBase58(account.xpub);
-    let key = gen_child_pub(xpub, false, i);
+    const bipXpub = bip32.fromBase58(xpub.mainnet);
+    const key = gen_child_pub(bipXpub, false, i);
     const address = bitcoin.payments.p2wpkh({ pubkey: key.publicKey });
     mainnets.push(address.address);
   }
   for (let i = 0; i < account.change_ind + 1; ++i){
-    let xpub = bip32.fromBase58(account.xpub);
-    let key = gen_child_pub(xpub, true, i);
+    const bipXpub = bip32.fromBase58(xpub.mainnet);
+    const key = gen_child_pub(bipXpub, true, i);
     const address = bitcoin.payments.p2wpkh({ pubkey: key.publicKey });
     mainnets.push(address.address);
   }

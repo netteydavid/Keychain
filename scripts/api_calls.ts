@@ -39,12 +39,15 @@ export function update_price(callback: Function){
 export function get_balance(callback: Function){
     let settings = get_settings();
     const url = settings.testnet ? settings.testnet_node : settings.mainnet_node;
-    chrome.storage.local.get("accounts", (result) => {
+    chrome.storage.local.get(["accounts", "xpubs"], (result) => {
         let addresses: string[] = [];
-        if (result.accounts != null && result.accounts.length > 0){
+        if (result.xpubs != null && result.xpubs.length > 0 && 
+            result.accounts != null && result.accounts.length > 0){
+
+            console.log(JSON.stringify(result.xpubs));
             console.log(JSON.stringify(result.accounts));
-            for (let i = 0; i < result.accounts.length; ++i){
-                let account_addresses = get_account_addresses(result.accounts[i]);
+            for (let i = 0; i < result.xpubs.length; ++i){
+                let account_addresses = get_account_addresses(result.accounts[i], result.xpubs[i]);
                 if (settings.testnet){
                     for (let j = 0; j < account_addresses.testnets.length; ++j){
                         addresses.push(account_addresses.testnets[j]);
