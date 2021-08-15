@@ -1,7 +1,7 @@
 "use strict";
 import * as $ from 'jquery';
 import { goto_account } from './navigation';
-import { get_settings } from './popup';
+import { get_accounts, get_settings, set_accounts } from './popup';
 import { Account } from './models/Account';
 import { get_balance, update_price } from './api_calls';
 
@@ -24,35 +24,10 @@ export function add_account(){
         $("#no_name_err").show();
     }
     else{
-        chrome.storage.local.get(["accounts"], (results) => {
-            let accounts = [];
-            if (results.accounts != null){
-                accounts = results.accounts;
-            }
-            accounts.push({name: name, rec: 0, change: 0});
-            chrome.storage.local.set({accounts}, () => {
-                close_account_creation();
-                list_accounts();
-            })
-        });
+        let accounts = get_accounts();
+        accounts.push(new Account(name as string));
+        set_accounts(accounts);
     }
-}
-
-export function accounts_check(advanced: boolean, callback: Function){
-    chrome.storage.local.get(["accounts"], (results) => {
-        let accounts: Account[] = [];
-        if (results.accounts != null && advanced){
-            accounts = results.accounts;
-            callback(accounts)
-        }
-        else {
-            accounts.push(new Account("Main"));
-            chrome.storage.local.set({accounts}, () => {
-                console.log("Added main account");
-                callback(accounts)
-            });
-        }
-    });
 }
 
 export function create_account(){

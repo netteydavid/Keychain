@@ -1,5 +1,5 @@
 import { get_account_addresses } from './manage_keys';
-import { get_settings } from './popup';
+import { get_accounts, get_settings, get_xpubs } from './popup';
 
 export let balance: number = 0;
 
@@ -39,63 +39,33 @@ export function update_price(callback: Function){
 export function get_balance(callback: Function){
     let settings = get_settings();
     const url = settings.testnet ? settings.testnet_node : settings.mainnet_node;
-    chrome.storage.local.get(["accounts", "xpubs"], (result) => {
-        let addresses: string[] = [];
-        if (result.xpubs != null && result.xpubs.length > 0 && 
-            result.accounts != null && result.accounts.length > 0){
-
-            console.log(JSON.stringify(result.xpubs));
-            console.log(JSON.stringify(result.accounts));
-            for (let i = 0; i < result.xpubs.length; ++i){
-                let account_addresses = get_account_addresses(result.accounts[i], result.xpubs[i]);
-                if (settings.testnet){
-                    for (let j = 0; j < account_addresses.testnets.length; ++j){
-                        addresses.push(account_addresses.testnets[j]);
-                    }
-                }
-                else{
-                    for (let j = 0; j < account_addresses.mainnets.length; ++j){
-                        addresses.push(account_addresses.mainnets[j]);
-                    }
-                }
-            }
-
-            balance = 0;
-            for (let i = 0; i < addresses.length; ++i){
-                fetch(`${url}/address/${addresses[i]}/utxo`)
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log(`Balance data: ${JSON.stringify(data)}`);
-                        for (let j = 0; j < data.length; ++j){
-                            balance += data[j].value;
-                        }
-                        callback(balance);
-                    });
+    const accounts = get_accounts();
+    const xpubs = get_xpubs();
+    let addresses: string[] = [];
+    for (let i = 0; i < xpubs.length; ++i){
+        let account_addresses = get_account_addresses(accounts[i], xpubs[i]);
+        if (settings.testnet){
+            for (let j = 0; j < account_addresses.testnets.length; ++j){
+                addresses.push(account_addresses.testnets[j]);
             }
         }
         else{
-            callback(0);
+            for (let j = 0; j < account_addresses.mainnets.length; ++j){
+                addresses.push(account_addresses.mainnets[j]);
+            }
         }
-    });
-    // chrome.storage.local.get("addresses", (result) => {
-    //     let addresses: string[] = [];
-    //     if (result.addresses != null && result.addresses.length > 0){
-    //         addresses = result.addresses;
-    //         for (let i = 0; i < addresses.length; ++i){
-    //             fetch(`${url}/address/${addresses[i]}/utxo`)
-    //                 .then(response => response.json())
-    //                 .then(data => {
-    //                     console.log(`Balance data: ${JSON.stringify(data)}`);
-    //                     let balance: number = 0;
-    //                     for (let j = 0; j < data.length; ++j){
-    //                         balance += data[j].value;
-    //                     }
-    //                     callback(balance);
-    //                 });
-    //         }
-    //     }
-    //     else{
-    //         callback(0);
-    //     }
-    // });
+    }
+
+    balance = 0;
+    for (let i = 0; i < addresses.length; ++i){
+        fetch(`${url}/address/${addresses[i]}/utxo`)
+            .then(response => response.json())
+            .then(data => {
+                console.log(`Address: ${addresses[i]}, ${JSON.stringify(data)}`);
+                for (let j = 0; j < data.length; ++j){
+                    balance += data[j].value;
+                }
+                callback(balance);
+            });
+    }
 }

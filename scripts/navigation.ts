@@ -5,10 +5,11 @@ import { compile_mnemonic } from './recover_wallet';
 import { set_password } from './create_pwd';
 import { login } from './login';
 import {load_account} from './account';
-import { add_account, close_account_creation, create_account, accounts_check, list_accounts, call_update } from './home';
+import { add_account, close_account_creation, create_account, list_accounts, call_update } from './home';
 import { Page } from './models/Page';
 import exp = require('constants');
-import { get_settings } from './popup';
+import { get_accounts, get_settings } from './popup';
+import { generate_address } from './recieve';
 
 let breadcrumbs: Page[] = [];
 
@@ -64,20 +65,18 @@ export function goto_home(advanced: boolean){
             $("#new_account_btn").on("click", add_account);
             $("#cancel_account_btn").on("click", close_account_creation);
             $("#logout").on("click", logout);
-            accounts_check(advanced, (accounts) => {
-                list_accounts(accounts);
-                call_update();
-            });
+            const accounts = get_accounts();
+            if (advanced) list_accounts(accounts);
+            call_update();
         });
     }
     else{
         $("#content").load("../pages/home.html", () => {
-            //TODO: Send button
-            //TODO: Recieve button
+            $("#recieve").on("click", () => goto_recieve());
+            $("#send").on("click", () => goto_send());
             $("#logout").on("click", logout);
-            accounts_check(advanced, (accounts) => {
-                call_update();
-            });
+            get_accounts();
+            call_update();
         });
     }
 }
@@ -92,6 +91,18 @@ export function goto_account(eventObject){
     });
 }
 
+export function goto_recieve(acct: number = 0){
+    $("#content").load("../pages/recieve.html", () => {
+        $(".back_btn").on("click", back);
+        generate_address(acct);
+        breadcrumbs.push(new Page(goto_recieve, [acct]));
+    });
+}
+
+export function goto_send(acct: number = 0){
+    
+}
+
 export function back(){
     if (breadcrumbs == null){
         return;
@@ -99,16 +110,14 @@ export function back(){
     else{
         breadcrumbs.pop();
         if (breadcrumbs.length < 1){
-            chrome.storage.local.get(["xpriv", "accounts"], (results) =>
+            chrome.storage.local.get(["xpriv"], (result) =>
             {
-                if (results.accounts != null && results.xpriv != null){
+                get_accounts();
+                if (result.xpriv != null){
                     goto_home(get_settings().advanced);
                 }
-                else if (results.accounts != null){
+                else {
                     goto_login();
-                }
-                else{
-                    goto_init();
                 }
             });
         }

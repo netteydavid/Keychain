@@ -1,10 +1,11 @@
 "use strict";
 import * as $ from 'jquery';
+import { Account } from './models/Account';
+import { get_accounts } from './popup';
 
 export function load_account(account){
-    chrome.storage.local.get(["accounts"], (results) => {
-        let acct = results.accounts[account];
-        $("#account_name").html(acct.name);
-        $("#balance").html("0 sats");
-    });
+    const accounts: Account[] = get_accounts();
+    let acct = accounts[account];
+    $("#account_name").html(acct.name);
+    $("#balance").html("0 sats");
 }

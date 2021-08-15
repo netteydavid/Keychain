@@ -6,9 +6,8 @@ import * as crypto from 'crypto';
 import * as $ from 'jquery';
 import { Account } from './models/Account';
 import { Xpub } from './models/Xpub';
-import { get_settings } from './popup';
+import { get_accounts, get_settings, get_xpubs, set_xpubs } from './popup';
 import * as bitcoin from 'bitcoinjs-lib';
-import { accounts_check } from './home';
 
 export function encryptXpriv(password, mnemonic){
     //Get seed
@@ -66,57 +65,51 @@ export function decryptXpriv(password, callback){
   }
 
 export function check_xpubs(xpriv: bip32.BIP32Interface, callback: Function){
-  chrome.storage.local.get(["accounts", "xpubs"], (results) => {
-    const accounts: Account[] = results.accounts;
-    const xpubs: Xpub[] = results.xpubs;
-    let new_xpubs: Xpub[] = [];
-    if (accounts != null){
-      for (let i = 0; i < accounts.length; ++i){
-        if (xpubs == null || i >= xpubs.length){
-          let xpub = new Xpub();
-          xpub.account = i;
-          const testkey = xpriv.deriveHardened(84)
-            .deriveHardened(1)
-            .deriveHardened(i);
-          const mainkey = xpriv.deriveHardened(84)
-            .deriveHardened(0)
-            .deriveHardened(i);
-          xpub.mainnet = mainkey.neutered().toBase58();
-          xpub.testnet = testkey.neutered().toBase58();
 
-          new_xpubs.push(xpub);
-        }
-        else{
-          new_xpubs.push(xpubs[i]);
-        }
-      }
-      
-      if (xpubs == null || xpubs.length != new_xpubs.length){
-        chrome.storage.local.set({ xpubs: new_xpubs }, callback());
-      }
+  const accounts: Account[] = get_accounts();
+  const xpubs: Xpub[] = get_xpubs();
+  let new_xpubs: Xpub[] = [];
+
+  for (let i = 0; i < accounts.length; ++i){
+    if (xpubs == null || i >= xpubs.length){
+      let xpub = new Xpub();
+      xpub.account = i;
+      const testkey = xpriv.deriveHardened(84)
+        .deriveHardened(1)
+        .deriveHardened(i);
+      const mainkey = xpriv.deriveHardened(84)
+        .deriveHardened(0)
+        .deriveHardened(i);
+      xpub.mainnet = mainkey.neutered().toBase58();
+      xpub.testnet = testkey.neutered().toBase58();
+
+      new_xpubs.push(xpub);
     }
     else{
-      accounts_check(false, (accounts) => {
-        check_xpubs(xpriv, callback);
-      });
+      new_xpubs.push(xpubs[i]);
     }
-  });
+  }
+  
+  if (xpubs == null || xpubs.length != new_xpubs.length){
+    set_xpubs(new_xpubs, () => callback());
+  }
+  else{
+    callback();
+  }
 }
 
 export function all_addresses(xpriv: bip32.BIP32Interface, callback: Function){
-  chrome.storage.local.get("accounts", (results) => {
-    let accounts: Account[] = results.accounts;
-    let result: string[] = [];
-    if (accounts != null){
-      for (let i = 0; i < accounts.length; ++i){
-        let account_addrs: string[] = list_addresses(xpriv, i, accounts[i]);
-        for (let j = 0; j < account_addrs.length; ++j){
-          result.push(account_addrs[i]);
-        }
+  let accounts: Account[] = get_accounts();
+  let results: string[] = [];
+  if (accounts != null){
+    for (let i = 0; i < accounts.length; ++i){
+      let account_addrs: string[] = list_addresses(xpriv, i, accounts[i]);
+      for (let j = 0; j < account_addrs.length; ++j){
+        results.push(account_addrs[i]);
       }
     }
-    callback(result);
-  });
+  }
+  callback(results);
 }
 
 export function list_addresses(xpriv: bip32.BIP32Interface, account_ind: number, account: Account){
@@ -125,13 +118,15 @@ export function list_addresses(xpriv: bip32.BIP32Interface, account_ind: number,
   for (let i = 0; i < account.recieve_ind + 1; ++i){
     let key = gen_child(xpriv, settings.testnet, account_ind, false, i);
     const keyPair = bitcoin.ECPair.fromPrivateKey(key.privateKey);
-    const address = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
+    const address = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey, 
+      network: settings.testnet ? bitcoin.networks.testnet : bitcoin.networks.bitcoin });
     results.push(address.address);
   }
   for (let i = 0; i < account.change_ind + 1; ++i){
     let key = gen_child(xpriv, settings.testnet, account_ind, true, i);
     const keyPair = bitcoin.ECPair.fromPrivateKey(key.privateKey);
-    const address = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
+    const address = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey, 
+      network: settings.testnet ? bitcoin.networks.testnet : bitcoin.networks.bitcoin });
     results.push(address.address);
   }
   return results;
@@ -141,20 +136,17 @@ export function get_account_addresses(account: Account, xpub: Xpub){
   let testnets: string[] = [];
   let mainnets: string[] = [];
 
-  console.log(`Testnet: ${xpub.testnet}`);
-  console.log(`Mainnet: ${xpub.mainnet}`);
-
   //Testnet
   for (let i = 0; i < account.recieve_ind + 1; ++i){
     const bipXpub = bip32.fromBase58(xpub.testnet);
     const key = gen_child_pub(bipXpub, false, i);
-    const address = bitcoin.payments.p2wpkh({ pubkey: key.publicKey });
+    const address = bitcoin.payments.p2wpkh({ pubkey: key.publicKey, network: bitcoin.networks.testnet });
     testnets.push(address.address);
   }
   for (let i = 0; i < account.change_ind + 1; ++i){
     const bipXpub = bip32.fromBase58(xpub.testnet);
     const key = gen_child_pub(bipXpub, true, i);
-    const address = bitcoin.payments.p2wpkh({ pubkey: key.publicKey });
+    const address = bitcoin.payments.p2wpkh({ pubkey: key.publicKey, network: bitcoin.networks.testnet });
     testnets.push(address.address);
   }
 
