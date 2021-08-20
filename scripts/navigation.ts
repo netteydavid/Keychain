@@ -73,7 +73,7 @@ export function goto_home(advanced: boolean){
     else{
         $("#content").load("../pages/home.html", () => {
             $("#recieve").on("click", () => goto_recieve());
-            $("#send").on("click", () => goto_send());
+            $("#send").on("click", () => goto_send(false));
             $("#logout").on("click", logout);
             get_accounts();
             call_update();
@@ -83,7 +83,8 @@ export function goto_home(advanced: boolean){
 
 export function goto_account(eventObject){
     $("#content").load("../pages/account.html", () => {
-        // $("#account_script").load("./account.js");
+        $("#recieve").on("click", () => goto_recieve(eventObject.data.i));
+        $("#send").on("click", () => goto_send(true, eventObject.data.i));
         $(".back_btn").on("click", back);
         load_account(eventObject.data.i);
         
@@ -99,7 +100,7 @@ export function goto_recieve(acct: number = 0){
     });
 }
 
-export function goto_send(acct: number = 0){
+export function goto_send(advanced: boolean, acct: number = 0){
     
 }
 

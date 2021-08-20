@@ -5,6 +5,7 @@ import { goto_home } from "./navigation";
 import { get_settings } from './popup';
 
 export function login(){
+  $("#incorrect_pass").hide();
   const pwd = $("#pass").val();
 
   decryptXpriv(pwd, (xpriv) =>{

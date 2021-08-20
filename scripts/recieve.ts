@@ -1,12 +1,11 @@
 "use strict";
 import * as $ from 'jquery';
-import * as QRCode from 'qrcode';
-import { Account } from './models/Account';
 import { Xpub } from './models/Xpub';
 import * as bip32 from 'bip32';
 import * as bitcoin from 'bitcoinjs-lib';
 import { get_accounts, get_settings, get_xpubs, set_accounts } from './popup';
 import { gen_child_pub } from './manage_keys';
+import * as QRCode from 'qrcode';
 
 export function generate_address(account_ind: number = 0){
     let accounts = get_accounts();
@@ -21,10 +20,11 @@ export function generate_address(account_ind: number = 0){
         network: settings.testnet ? bitcoin.networks.testnet : bitcoin.networks.bitcoin });
 
     $("#address").val(address.address);
-    // QRCode.toCanvas($("#qr").get(0), `bitcoin<${address.address}>`, (error) => {
-    //     $("#qr").text("Unable to generate QR code");
-    // });
     
-    //TODO: Figure out why this doesn't save across methods
+    //TODO: Gen QR code
+    QRCode.toCanvas($("#qr").get(0), `bitcoin<${address.address}>`, error => {
+        if (error) console.error(error);
+    });
+
     set_accounts(accounts);
 }

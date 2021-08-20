@@ -51,7 +51,7 @@ export function decryptXpriv(password, callback){
         callback(bip32.fromBase58(decrypted));
       }
       catch{
-        $("#incorrect_pass").html("Incorrect Password.");
+        $("#incorrect_pass").show();
       }
     });
   }
