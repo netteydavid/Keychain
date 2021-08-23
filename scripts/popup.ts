@@ -16,6 +16,8 @@ let accounts: Account[] = [];
 
 let xpubs: Xpub[] = [];
 
+let addr_gap: number = 0;
+
 export function get_settings(){
     return (current_settings != null) ? current_settings : default_settings;
 }
@@ -52,7 +54,7 @@ export function set_xpubs(new_xpubs: Xpub[], callback: Function = null){
 window.onload = () => {
     $("#clear_btn").on("click", clear_memory);
     window.onclick = () => stay_alive();
-    chrome.storage.local.get(["settings", "xpriv", "last_login", "accounts"], (result) => {
+    chrome.storage.local.get(["settings", "xpriv", "xpubs", "last_login", "accounts"], (result) => {
         
         if (result.settings != null){
             current_settings = result.settings;
@@ -66,7 +68,12 @@ window.onload = () => {
             accounts = result.accounts;
         }
         else{
+            //TODO: Generate addresses up to the address gap limit and account limit
             accounts.push(new Account("Main"));
+        }
+
+        if (result.xpubs != null && (result.xpubs as Xpub[]).length > 0){
+            xpubs = result.xpubs;
         }
 
         const settings = get_settings();
