@@ -1,4 +1,4 @@
-import { get_account_addresses } from './manage_keys';
+import { get_account_addresses, get_change_addresses, get_recieve_addresses } from './manage_keys';
 import { get_accounts, get_settings, get_xpubs } from './popup';
 
 export let balance: number = 0;
@@ -36,36 +36,36 @@ export function update_price(callback: Function){
     });
 }
 
-export function get_balance(callback: Function){
+export function get_address_balance(address: string, callback: Function){
     let settings = get_settings();
     const url = settings.testnet ? settings.testnet_node : settings.mainnet_node;
+    fetch(`${url}/address/${address}/utxo`)
+                .then(response => response.json())
+                .then(data => {
+                    let total = 0;
+                    for (let i = 0; i < data.length; ++i){
+                        total += data[i].value;
+                    }
+                    callback(total);
+                });
+}
+
+export function get_balance(callback: Function){
+    let settings = get_settings();
     const accounts = get_accounts();
     const xpubs = get_xpubs();
-    let addresses: string[] = [];
-    for (let i = 0; i < xpubs.length; ++i){
-        let account_addresses = get_account_addresses(accounts[i], xpubs[i]);
-        if (settings.testnet){
-            for (let j = 0; j < account_addresses.testnets.length; ++j){
-                addresses.push(account_addresses.testnets[j]);
-            }
-        }
-        else{
-            for (let j = 0; j < account_addresses.mainnets.length; ++j){
-                addresses.push(account_addresses.mainnets[j]);
-            }
-        }
-    }
-
+    
     balance = 0;
-    for (let i = 0; i < addresses.length; ++i){
-        fetch(`${url}/address/${addresses[i]}/utxo`)
-            .then(response => response.json())
-            .then(data => {
-                console.log(`Address: ${addresses[i]}, ${JSON.stringify(data)}`);
-                for (let j = 0; j < data.length; ++j){
-                    balance += data[j].value;
-                }
+    for (let i = 0; i < xpubs.length; ++i){
+        let recieve_addresses = get_recieve_addresses(accounts[i], xpubs[i], settings.testnet);
+        let change_addresses = get_change_addresses(accounts[i], xpubs[i], settings.testnet);
+
+        let addresses = recieve_addresses.concat(change_addresses);
+        for (let j = 0; j < addresses.length; ++j){
+            get_address_balance(addresses[j], (total) => {
+                balance += total;
                 callback(balance);
             });
+        }
     }
 }

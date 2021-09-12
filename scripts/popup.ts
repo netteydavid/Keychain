@@ -1,5 +1,6 @@
 "use strict";
 
+import { bip32 } from 'bitcoinjs-lib';
 import * as $ from 'jquery';
 import { Account } from './models/Account';
 import { Settings } from "./models/Settings";
@@ -24,7 +25,7 @@ export function get_settings(){
 
 export function get_accounts(){
     if (accounts == null || accounts.length < 1){
-        accounts.push(new Account("Main"));
+        accounts.push(new Account("Account"));
         chrome.storage.local.set({ accounts: accounts });
         return accounts;
     }
@@ -68,8 +69,7 @@ window.onload = () => {
             accounts = result.accounts;
         }
         else{
-            //TODO: Generate addresses up to the address gap limit and account limit
-            accounts.push(new Account("Main"));
+            accounts.push(new Account("Account 1"));
         }
 
         if (result.xpubs != null && (result.xpubs as Xpub[]).length > 0){

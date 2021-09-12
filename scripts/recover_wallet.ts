@@ -40,8 +40,8 @@ export function compile_mnemonic(){
   
     //If each word has been entered and the mnemonic is valid, continue
     if (!incomplete && valid){
-        chrome.storage.local.set({words}, () => {
-            goto_create_pwd();
+        chrome.storage.local.set({words, recovered: true}, () => {
+            goto_create_pwd(true);
         });
     } 
 }

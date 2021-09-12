@@ -132,6 +132,45 @@ export function list_addresses(xpriv: bip32.BIP32Interface, account_ind: number,
   return results;
 }
 
+export function get_recieve_addresses(account: Account, xpub: Xpub, testnet: boolean, use_gap: boolean = false){
+  let addresses: string[] = [];
+
+  let index = account.recieve_ind + 1;
+
+  if (use_gap){
+    const settings = get_settings();
+    index += settings.address_gap;
+  }
+  
+  for (let i = 0; i < index; ++i){
+    const bipXpub = bip32.fromBase58(testnet ? xpub.testnet : xpub.mainnet);
+    const key = gen_child_pub(bipXpub, false, i);
+    const address = bitcoin.payments.p2wpkh({ 
+      pubkey: key.publicKey, 
+      network: testnet ? bitcoin.networks.testnet : bitcoin.networks.bitcoin
+    });
+    addresses.push(address.address);
+  }
+
+  return addresses;
+}
+
+export function get_change_addresses(account: Account, xpub: Xpub, testnet: boolean){
+  let addresses: string[] = [];
+  
+  for (let i = 0; i < account.recieve_ind + 1; ++i){
+    const bipXpub = bip32.fromBase58(testnet ? xpub.testnet : xpub.mainnet);
+    const key = gen_child_pub(bipXpub, true, i);
+    const address = bitcoin.payments.p2wpkh({ 
+      pubkey: key.publicKey, 
+      network: testnet ? bitcoin.networks.testnet : bitcoin.networks.bitcoin
+    });
+    addresses.push(address.address);
+  }
+
+  return addresses;
+}
+
 export function get_account_addresses(account: Account, xpub: Xpub){
   let testnets: string[] = [];
   let mainnets: string[] = [];

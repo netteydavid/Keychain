@@ -4,6 +4,7 @@ import { goto_account } from './navigation';
 import { get_accounts, get_settings, set_accounts } from './popup';
 import { Account } from './models/Account';
 import { get_balance, update_price } from './api_calls';
+import { recover_addresses } from './login';
 
 let update_timer = null;
 

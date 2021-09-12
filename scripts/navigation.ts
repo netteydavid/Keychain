@@ -28,7 +28,7 @@ export function goto_create(){
     //   $("#create_wallet_script").load("./create_wallet.js");
       $(".back_btn").on("click", back);
       $("#make_mnemonic").on("click", create_mnemonic);
-      $("#create_pwd").on("click", goto_create_pwd);
+      $("#create_pwd").on("click", () => goto_create_pwd());
       breadcrumbs.push(new Page(goto_create));
     });
 }
@@ -42,19 +42,19 @@ export function goto_recover(){
     });
 }
 
-export function goto_create_pwd(){
+export function goto_create_pwd(recovered: boolean = false){
     $("#content").load("../pages/create_pwd.html", () => {
         // $("#set_pwd_script").load("./create_pwd.js");
         $(".back_btn").on("click", back);
-        $("#set_pwd").on("click", set_password);
+        $("#set_pwd").on("click", () => set_password(recovered));
         breadcrumbs.push(new Page(goto_create_pwd));
     });
 }
 
-export function goto_login(){
+export function goto_login(recovered: boolean = false){
     $("#content").load("../pages/login.html", () => {
         // $("#login_script").load("./login.js");
-        $("#login_btn").on("click", login);
+        $("#login_btn").on("click", () => login(recovered));
     });
 }
 
