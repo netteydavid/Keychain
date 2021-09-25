@@ -42,19 +42,19 @@ export function goto_recover(){
     });
 }
 
-export function goto_create_pwd(recovered: boolean = false){
+export function goto_create_pwd(){
     $("#content").load("../pages/create_pwd.html", () => {
         // $("#set_pwd_script").load("./create_pwd.js");
         $(".back_btn").on("click", back);
-        $("#set_pwd").on("click", () => set_password(recovered));
+        $("#set_pwd").on("click", () => set_password());
         breadcrumbs.push(new Page(goto_create_pwd));
     });
 }
 
-export function goto_login(recovered: boolean = false){
+export function goto_login(){
     $("#content").load("../pages/login.html", () => {
         // $("#login_script").load("./login.js");
-        $("#login_btn").on("click", () => login(recovered));
+        $("#login_btn").on("click", () => login());
     });
 }
 
