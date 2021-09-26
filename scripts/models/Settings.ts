@@ -2,7 +2,7 @@
 
 export class Settings{
     login_timeout: number = 5;
-    testnet: boolean = false;
+    testnet: boolean = true;
     unit: number = 1;
     fiat: number = 1;
     advanced: boolean = false;
