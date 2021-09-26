@@ -1,3 +1,5 @@
 # Keychain Wallet
 
 Keychain is a Bitcoin wallet in your browser!
+
+WARNING: THIS IS A SIMPLE, UNPOLISHED, PROOF OF CONCEPT WALLET. PLEASE DO NOT USE FOR ANY REAL FUNDS ON THE BITOIN MAINNET.
