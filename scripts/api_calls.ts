@@ -9,29 +9,31 @@ export function update_price(callback: Function){
     fetch(settings.price_endpoint)
     .then(response => response.json())
     .then(data => {
-        if (settings.fiat == 2){
-            callback(data.bitcoin.eur, "EUR");
-        }
-        else if (settings.fiat == 3){
-            callback(data.bitcoin.gpb, "GPB");
-        }
-        else if (settings.fiat == 4){
-            callback(data.bitcoin.cny, "CNY");
-        }
-        else if (settings.fiat == 5){
-            callback(data.bitcoin.jpy, "JPY");
-        }
-        else if (settings.fiat == 6){
-            callback(data.bitcoin.rub, "RUB");
-        }
-        else if (settings.fiat == 7){
-            callback(data.bitcoin.cad, "CAD");
-        }
-        else if (settings.fiat == 8){
-            callback(data.bitcoin.aud, "AUD");
-        }
-        else {
-            callback(data.bitcoin.usd, "USD");
+        if (callback != null){
+            if (settings.fiat == 2){
+                callback(data.bitcoin.eur, "EUR");
+            }
+            else if (settings.fiat == 3){
+                callback(data.bitcoin.gpb, "GPB");
+            }
+            else if (settings.fiat == 4){
+                callback(data.bitcoin.cny, "CNY");
+            }
+            else if (settings.fiat == 5){
+                callback(data.bitcoin.jpy, "JPY");
+            }
+            else if (settings.fiat == 6){
+                callback(data.bitcoin.rub, "RUB");
+            }
+            else if (settings.fiat == 7){
+                callback(data.bitcoin.cad, "CAD");
+            }
+            else if (settings.fiat == 8){
+                callback(data.bitcoin.aud, "AUD");
+            }
+            else {
+                callback(data.bitcoin.usd, "USD");
+            }
         }
     });
 }
@@ -46,7 +48,8 @@ export function get_address_balance(address: string, callback: Function){
                     for (let i = 0; i < data.length; ++i){
                         total += data[i].value;
                     }
-                    callback(total);
+                    
+                    if (callback != null) callback(total);
                 });
 }
 
@@ -64,7 +67,7 @@ export function get_balance(callback: Function){
         for (let j = 0; j < addresses.length; ++j){
             get_address_balance(addresses[j], (total) => {
                 balance += total;
-                callback(balance);
+                if (callback != null) callback(balance);
             });
         }
     }

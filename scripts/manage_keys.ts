@@ -48,7 +48,7 @@ export function decryptXpriv(password, callback){
         const decipher = crypto.createDecipheriv("aes256", hashed, hexToBuffer(result.iv));
         let decrypted = decipher.update(result.xpriv, "hex", "utf-8");
         decrypted += decipher.final("utf-8");
-        callback(bip32.fromBase58(decrypted));
+        if (callback != null) callback(bip32.fromBase58(decrypted));
       }
       catch{
         $("#incorrect_pass").show();
@@ -91,9 +91,9 @@ export function check_xpubs(xpriv: bip32.BIP32Interface, callback: Function){
   }
   
   if (xpubs == null || xpubs.length != new_xpubs.length){
-    set_xpubs(new_xpubs, () => callback());
+    set_xpubs(new_xpubs, () => {if (callback != null) callback()});
   }
-  else{
+  else if (callback != null){
     callback();
   }
 }
@@ -109,7 +109,7 @@ export function all_addresses(xpriv: bip32.BIP32Interface, callback: Function){
       }
     }
   }
-  callback(results);
+  if (callback != null) callback(results);
 }
 
 export function list_addresses(xpriv: bip32.BIP32Interface, account_ind: number, account: Account){
